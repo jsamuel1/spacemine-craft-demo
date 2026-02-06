@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { World } from '../world/World';
 import { BlockType } from '../types';
 import { CHUNK_SIZE } from '../world/Chunk';
+import { Inventory } from '../systems/Inventory';
 
 export class BlockInteraction {
   private world: World;
@@ -9,6 +10,7 @@ export class BlockInteraction {
   private highlight: THREE.LineSegments;
   private canvas: HTMLCanvasElement;
   selectedBlock: BlockType = BlockType.BASALT;
+  inventory: Inventory | null = null;
   private maxDist = 8;
 
   constructor(world: World, camera: THREE.PerspectiveCamera, canvas: HTMLCanvasElement, scene: THREE.Scene) {
@@ -29,6 +31,10 @@ export class BlockInteraction {
       else if (e.button === 2) this.place();
     });
     canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'KeyO') this.destroy();
+      else if (e.code === 'KeyP') this.place();
+    });
   }
 
   /** DDA voxel raycast. Returns {hit, pos, normal} */
@@ -85,19 +91,25 @@ export class BlockInteraction {
     const hit = this.raycast();
     if (!hit) return;
     const { x, y, z } = hit.pos;
+    const blockType = this.world.getBlock(x, y, z);
     this.world.setBlock(x, y, z, BlockType.AIR);
     this.rebuildAt(x, y, z);
+    if (this.inventory && blockType !== BlockType.AIR) this.inventory.add(blockType);
   }
 
   private place() {
     const hit = this.raycast();
     if (!hit) return;
+    if (this.inventory && !this.inventory.remove(this.selectedBlock)) return;
     const px = hit.pos.x + hit.normal.x;
     const py = hit.pos.y + hit.normal.y;
     const pz = hit.pos.z + hit.normal.z;
     // Don't place inside the player
     const cp = this.camera.position;
-    if (Math.floor(cp.x) === px && (Math.floor(cp.y) === py || Math.floor(cp.y - 1) === py) && Math.floor(cp.z) === pz) return;
+    if (Math.floor(cp.x) === px && (Math.floor(cp.y) === py || Math.floor(cp.y - 1) === py) && Math.floor(cp.z) === pz) {
+      if (this.inventory) this.inventory.add(this.selectedBlock); // refund
+      return;
+    }
     this.world.setBlock(px, py, pz, this.selectedBlock);
     this.rebuildAt(px, py, pz);
   }

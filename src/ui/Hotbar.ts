@@ -1,5 +1,6 @@
 import { BlockType } from '../types';
 import { BLOCK_DEFS } from '../world/BlockDefs';
+import { Inventory } from '../systems/Inventory';
 
 const SLOTS: BlockType[] = [
   BlockType.BASALT, BlockType.IRON_ORE, BlockType.ICE, BlockType.NICKEL,
@@ -12,6 +13,8 @@ export class Hotbar {
   slots = SLOTS;
   private el: HTMLDivElement;
   private slotEls: HTMLDivElement[] = [];
+  private qtyEls: HTMLSpanElement[] = [];
+  private inventory: Inventory | null = null;
 
   get selectedBlock(): BlockType {
     return this.slots[this.activeIndex];
@@ -34,11 +37,15 @@ export class Hotbar {
         background: `rgb(${r * 255 | 0},${g * 255 | 0},${b * 255 | 0})`,
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end',
         fontSize: '8px', color: '#fff', fontFamily: 'monospace', padding: '2px',
-        textShadow: '0 0 2px #000', userSelect: 'none',
+        textShadow: '0 0 2px #000', userSelect: 'none', position: 'relative',
       });
-      slot.innerHTML = `<span style="font-size:10px;opacity:0.7">${i + 1}</span><span>${def.name}</span>`;
+      const qtySpan = document.createElement('span');
+      Object.assign(qtySpan.style, { position: 'absolute', top: '1px', right: '3px', fontSize: '10px', fontWeight: 'bold' });
+      slot.appendChild(qtySpan);
+      slot.innerHTML += `<span style="font-size:10px;opacity:0.7">${i + 1}</span><span>${def.name}</span>`;
       this.el.appendChild(slot);
       this.slotEls.push(slot);
+      this.qtyEls.push(qtySpan);
     }
 
     this.render();
@@ -53,11 +60,20 @@ export class Hotbar {
     });
   }
 
-  private render() {
+  setInventory(inv: Inventory) {
+    this.inventory = inv;
+  }
+
+  render() {
     this.slotEls.forEach((s, i) => {
       s.style.border = i === this.activeIndex
         ? '2px solid #fff'
         : '2px solid rgba(255,255,255,0.3)';
     });
+    if (this.inventory) {
+      this.qtyEls.forEach((el, i) => {
+        el.textContent = String(this.inventory!.get(this.slots[i]));
+      });
+    }
   }
 }
