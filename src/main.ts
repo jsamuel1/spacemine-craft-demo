@@ -4,6 +4,7 @@ import { Player } from './player/Player';
 import { Controls } from './player/Controls';
 import { AsteroidGenerator } from './world/AsteroidGenerator';
 import { BlockInteraction } from './player/BlockInteraction';
+import { Hotbar } from './ui/Hotbar';
 
 const engine = new Engine();
 const world = new World(engine.scene);
@@ -19,9 +20,11 @@ player.position.set(first.cx, first.cy + first.radius + 10, first.cz + first.rad
 
 const controls = new Controls(player, engine.camera, engine.renderer.domElement, world);
 const interaction = new BlockInteraction(world, engine.camera, engine.renderer.domElement, engine.scene);
+const hotbar = new Hotbar();
 
 engine.onUpdate((dt) => {
   controls.update(dt);
+  interaction.selectedBlock = hotbar.selectedBlock;
   interaction.update();
 });
 engine.start();
