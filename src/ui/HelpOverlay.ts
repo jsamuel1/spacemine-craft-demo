@@ -20,6 +20,7 @@ export class HelpOverlay {
         <tr><td>E</td><td>Inventory</td></tr>
         <tr><td>M</td><td>Trading Post</td></tr>
         <tr><td>C</td><td>Crafting Station</td></tr>
+        <tr><td>F + Click</td><td>Interact (doors/crates)</td></tr>
         <tr><td>H</td><td>Toggle this help</td></tr>
       </table>
     `;

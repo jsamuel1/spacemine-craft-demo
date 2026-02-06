@@ -3,6 +3,8 @@ import { World } from '../world/World';
 import { BlockType } from '../types';
 import { CHUNK_SIZE } from '../world/Chunk';
 import { Inventory } from '../systems/Inventory';
+import { InteractiveBlocks } from '../world/InteractiveBlocks';
+import { CratePanel } from '../ui/CratePanel';
 
 export class BlockInteraction {
   private world: World;
@@ -11,7 +13,10 @@ export class BlockInteraction {
   private canvas: HTMLCanvasElement;
   selectedBlock: BlockType = BlockType.BASALT;
   inventory: Inventory | null = null;
+  interactive: InteractiveBlocks | null = null;
+  cratePanel: CratePanel | null = null;
   private maxDist = 8;
+  private interactKey = false;
 
   constructor(world: World, camera: THREE.PerspectiveCamera, canvas: HTMLCanvasElement, scene: THREE.Scene) {
     this.world = world;
@@ -27,13 +32,18 @@ export class BlockInteraction {
 
     canvas.addEventListener('mousedown', (e) => {
       if (document.pointerLockElement !== canvas) return;
-      if (e.button === 0) this.destroy();
+      if (e.button === 0) this.onLeftClick();
       else if (e.button === 2) this.place();
     });
     canvas.addEventListener('contextmenu', (e) => e.preventDefault());
     document.addEventListener('keydown', (e) => {
-      if (e.code === 'KeyO') this.destroy();
+      if (e.code === 'KeyO') this.onLeftClick();
       else if (e.code === 'KeyP') this.place();
+      else if (e.code === 'KeyF' && this.cratePanel?.visible) { this.cratePanel.close(); e.preventDefault(); }
+      else if (e.code === 'KeyF') this.interactKey = true;
+    });
+    document.addEventListener('keyup', (e) => {
+      if (e.code === 'KeyF') this.interactKey = false;
     });
   }
 
@@ -85,6 +95,23 @@ export class BlockInteraction {
     if (ly === CHUNK_SIZE - 1) this.world.rebuildChunkMesh(cx, cy + 1, cz);
     if (lz === 0) this.world.rebuildChunkMesh(cx, cy, cz - 1);
     if (lz === CHUNK_SIZE - 1) this.world.rebuildChunkMesh(cx, cy, cz + 1);
+  }
+
+  private onLeftClick() {
+    if (this.interactKey && this.interactive) {
+      const hit = this.raycast();
+      if (!hit) return;
+      const { x, y, z } = hit.pos;
+      const block = this.world.getBlock(x, y, z);
+      if (block === BlockType.AIRLOCK_DOOR) {
+        this.interactive.toggleDoor(x, y, z);
+        this.rebuildAt(x, y, z);
+      } else if (block === BlockType.STORAGE_CRATE && this.cratePanel) {
+        this.cratePanel.open(x, y, z);
+      }
+      return;
+    }
+    this.destroy();
   }
 
   private destroy() {

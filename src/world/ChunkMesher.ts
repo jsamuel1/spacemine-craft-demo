@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { Chunk, CHUNK_SIZE } from './Chunk';
 import { BlockType } from '../types';
 import { BLOCK_DEFS } from './BlockDefs';
+import { InteractiveBlocks } from './InteractiveBlocks';
 
 const FACES = [
   { dir: [ 1, 0, 0], verts: [[1,0,0],[1,1,0],[1,1,1],[1,0,1]] },
@@ -12,7 +13,23 @@ const FACES = [
   { dir: [ 0, 0,-1], verts: [[1,0,0],[0,0,0],[0,1,0],[1,1,0]] },
 ];
 
-export function buildChunkMesh(chunk: Chunk, getNeighborBlock: (x: number, y: number, z: number) => BlockType): THREE.BufferGeometry {
+// Thin slab faces for open airlock doors (offset to x=0 side, 0.2 thick)
+const SLAB_T = 0.2;
+const SLAB_FACES = [
+  { dir: [ 1, 0, 0], verts: [[SLAB_T,0,0],[SLAB_T,1,0],[SLAB_T,1,1],[SLAB_T,0,1]] },
+  { dir: [-1, 0, 0], verts: [[0,0,1],[0,1,1],[0,1,0],[0,0,0]] },
+  { dir: [ 0, 1, 0], verts: [[0,1,0],[0,1,1],[SLAB_T,1,1],[SLAB_T,1,0]] },
+  { dir: [ 0,-1, 0], verts: [[0,0,1],[0,0,0],[SLAB_T,0,0],[SLAB_T,0,1]] },
+  { dir: [ 0, 0, 1], verts: [[0,0,1],[SLAB_T,0,1],[SLAB_T,1,1],[0,1,1]] },
+  { dir: [ 0, 0,-1], verts: [[SLAB_T,0,0],[0,0,0],[0,1,0],[SLAB_T,1,0]] },
+];
+
+export function buildChunkMesh(
+  chunk: Chunk,
+  getNeighborBlock: (x: number, y: number, z: number) => BlockType,
+  chunkX = 0, chunkY = 0, chunkZ = 0,
+  interactive?: InteractiveBlocks
+): THREE.BufferGeometry {
   const positions: number[] = [];
   const colors: number[] = [];
   const indices: number[] = [];
@@ -24,13 +41,21 @@ export function buildChunkMesh(chunk: Chunk, getNeighborBlock: (x: number, y: nu
         if (block === BlockType.AIR) continue;
         const [r, g, b] = BLOCK_DEFS[block].color;
 
-        for (const face of FACES) {
+        // Check if this is an open airlock door
+        const isOpenDoor = block === BlockType.AIRLOCK_DOOR && interactive?.isDoorOpen(
+          chunkX * CHUNK_SIZE + x, chunkY * CHUNK_SIZE + y, chunkZ * CHUNK_SIZE + z
+        );
+
+        const faceset = isOpenDoor ? SLAB_FACES : FACES;
+
+        for (const face of faceset) {
           const nx = x + face.dir[0], ny = y + face.dir[1], nz = z + face.dir[2];
-          // Check neighbor: in-chunk or cross-chunk
           const neighbor = (nx >= 0 && nx < CHUNK_SIZE && ny >= 0 && ny < CHUNK_SIZE && nz >= 0 && nz < CHUNK_SIZE)
             ? chunk.get(nx, ny, nz)
             : getNeighborBlock(nx, ny, nz);
-          if (neighbor !== BlockType.AIR) continue;
+
+          // Open doors always render all faces; normal blocks cull against solid neighbors
+          if (!isOpenDoor && neighbor !== BlockType.AIR) continue;
 
           const vi = positions.length / 3;
           for (const v of face.verts) {

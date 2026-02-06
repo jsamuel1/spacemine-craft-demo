@@ -34,6 +34,18 @@ export class Controls {
     document.addEventListener('keyup', (e) => this.keys.delete(e.code));
   }
 
+  /** Check if player AABB at (ex,ey,ez) eye position overlaps any solid block */
+  private collidesAt(ex: number, ey: number, ez: number, hw: number, h: number): boolean {
+    const minX = Math.floor(ex - hw), maxX = Math.floor(ex + hw);
+    const minY = Math.floor(ey - h),  maxY = Math.floor(ey + 0.1);
+    const minZ = Math.floor(ez - hw), maxZ = Math.floor(ez + hw);
+    for (let bx = minX; bx <= maxX; bx++)
+      for (let by = minY; by <= maxY; by++)
+        for (let bz = minZ; bz <= maxZ; bz++)
+          if (this.world.getBlock(bx, by, bz) !== BlockType.AIR) return true;
+    return false;
+  }
+
   update(dt: number) {
     const p = this.player;
     // Camera direction vectors
@@ -67,21 +79,29 @@ export class Controls {
     // Drag
     p.velocity.multiplyScalar(DRAG);
 
-    // Simple collision: stop if moving into a solid block
-    const next = p.position.clone().add(p.velocity.clone().multiplyScalar(dt));
-    const nx = Math.floor(next.x), ny = Math.floor(next.y), nz = Math.floor(next.z);
-    if (this.world.getBlock(nx, ny, nz) !== BlockType.AIR ||
-        this.world.getBlock(nx, Math.floor(next.y - 1.5), nz) !== BlockType.AIR && !p.magneticBoots) {
-      // Only zero out velocity components that cause collision
-      const testX = p.position.clone(); testX.x = next.x;
-      if (this.world.getBlock(Math.floor(testX.x), Math.floor(p.position.y), Math.floor(p.position.z)) !== BlockType.AIR) p.velocity.x = 0;
-      const testY = p.position.clone(); testY.y = next.y;
-      if (this.world.getBlock(Math.floor(p.position.x), Math.floor(testY.y), Math.floor(p.position.z)) !== BlockType.AIR) p.velocity.y = 0;
-      const testZ = p.position.clone(); testZ.z = next.z;
-      if (this.world.getBlock(Math.floor(p.position.x), Math.floor(p.position.y), Math.floor(testZ.z)) !== BlockType.AIR) p.velocity.z = 0;
+    // AABB collision: player is 0.6 wide, 1.7 tall (eyes at top)
+    const W = 0.3; // half-width
+    const H = 1.7; // total height below eye
+    const move = p.velocity.clone().multiplyScalar(dt);
+
+    // Check each axis independently
+    // X axis
+    const nx = p.position.x + move.x;
+    if (this.collidesAt(nx, p.position.y, p.position.z, W, H)) {
+      move.x = 0; p.velocity.x = 0;
+    }
+    // Y axis
+    const ny = p.position.y + move.y;
+    if (this.collidesAt(p.position.x + move.x, ny, p.position.z, W, H)) {
+      move.y = 0; p.velocity.y = 0;
+    }
+    // Z axis
+    const nz = p.position.z + move.z;
+    if (this.collidesAt(p.position.x + move.x, p.position.y + move.y, nz, W, H)) {
+      move.z = 0; p.velocity.z = 0;
     }
 
-    p.position.add(p.velocity.clone().multiplyScalar(dt));
+    p.position.add(move);
 
     // Update camera
     this.camera.position.copy(p.position);

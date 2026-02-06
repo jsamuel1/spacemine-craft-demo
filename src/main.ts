@@ -13,9 +13,13 @@ import { CreditDisplay } from './ui/CreditDisplay';
 import { Crafting } from './systems/Crafting';
 import { CraftingPanel } from './ui/CraftingPanel';
 import { HelpOverlay } from './ui/HelpOverlay';
+import { InteractiveBlocks } from './world/InteractiveBlocks';
+import { CratePanel } from './ui/CratePanel';
 
 const engine = new Engine();
 const world = new World(engine.scene);
+const interactive = new InteractiveBlocks();
+world.interactive = interactive;
 
 // Procedural asteroid belt
 world.generator = new AsteroidGenerator(42);
@@ -30,6 +34,9 @@ const controls = new Controls(player, engine.camera, engine.renderer.domElement,
 const inventory = new Inventory();
 const interaction = new BlockInteraction(world, engine.camera, engine.renderer.domElement, engine.scene);
 interaction.inventory = inventory;
+interaction.interactive = interactive;
+const cratePanel = new CratePanel(inventory, interactive);
+interaction.cratePanel = cratePanel;
 const hotbar = new Hotbar();
 hotbar.setInventory(inventory);
 const _inventoryPanel = new InventoryPanel(inventory);
