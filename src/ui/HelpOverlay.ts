@@ -48,5 +48,14 @@ export class HelpOverlay {
         this.el.style.display = this.el.style.display === 'none' ? 'block' : 'none';
       }
     }, true);
+
+    const hint = document.createElement('div');
+    Object.assign(hint.style, {
+      position: 'fixed', bottom: '8px', right: '12px',
+      color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace',
+      fontSize: '12px', pointerEvents: 'none', zIndex: '10',
+    });
+    hint.textContent = 'Press H for help';
+    document.body.appendChild(hint);
   }
 }
