@@ -26,10 +26,10 @@ export class HelpOverlay {
     `;
     Object.assign(this.el.style, {
       display: 'none', position: 'fixed', top: '50%', left: '50%',
-      transform: 'translate(-50%, -50%)', background: 'rgba(0,0,0,0.85)',
+      transform: 'translate(-50%, -50%)', background: 'rgba(0,0,0,0.5)',
       color: '#fff', padding: '24px 32px', borderRadius: '8px',
       fontFamily: 'monospace', fontSize: '14px', zIndex: '100',
-      border: '1px solid rgba(255,255,255,0.2)',
+      border: '1px solid rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)',
     });
     const style = document.createElement('style');
     style.textContent = `
