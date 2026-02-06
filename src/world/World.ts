@@ -2,12 +2,15 @@ import * as THREE from 'three';
 import { Chunk, CHUNK_SIZE } from './Chunk';
 import { BlockType } from '../types';
 import { buildChunkMesh } from './ChunkMesher';
+import { AsteroidGenerator } from './AsteroidGenerator';
 
 export class World {
   chunks = new Map<string, Chunk>();
   meshes = new Map<string, THREE.Mesh>();
   private scene: THREE.Scene;
   private material = new THREE.MeshLambertMaterial({ vertexColors: true });
+  private generated = new Set<string>();
+  generator: AsteroidGenerator | null = null;
 
   constructor(scene: THREE.Scene) {
     this.scene = scene;
@@ -21,6 +24,10 @@ export class World {
     if (!chunk) {
       chunk = new Chunk();
       this.chunks.set(k, chunk);
+    }
+    if (this.generator && !this.generated.has(k)) {
+      this.generated.add(k);
+      this.generator.generateChunk(chunk, cx, cy, cz);
     }
     return chunk;
   }
@@ -71,5 +78,21 @@ export class World {
       const [cx, cy, cz] = k.split(',').map(Number);
       this.rebuildChunkMesh(cx, cy, cz);
     }
+  }
+
+  /** Generate and mesh all chunks that overlap any asteroid */
+  generateAll() {
+    if (!this.generator) return;
+    for (const ast of this.generator.asteroids) {
+      const r = Math.ceil((ast.radius + 3) / CHUNK_SIZE);
+      const ccx = Math.floor(ast.cx / CHUNK_SIZE);
+      const ccy = Math.floor(ast.cy / CHUNK_SIZE);
+      const ccz = Math.floor(ast.cz / CHUNK_SIZE);
+      for (let dz = -r; dz <= r; dz++)
+        for (let dy = -r; dy <= r; dy++)
+          for (let dx = -r; dx <= r; dx++)
+            this.getChunk(ccx + dx, ccy + dy, ccz + dz);
+    }
+    this.rebuildAllMeshes();
   }
 }
