@@ -11,6 +11,7 @@ export class World {
   private scene: THREE.Scene;
   private material = new THREE.MeshLambertMaterial({ vertexColors: true });
   private generated = new Set<string>();
+  dirty = new Set<string>(); // chunks modified by player
   generator: AsteroidGenerator | null = null;
   interactive: InteractiveBlocks | null = null;
 
@@ -51,6 +52,7 @@ export class World {
     const ly = ((wy % CHUNK_SIZE) + CHUNK_SIZE) % CHUNK_SIZE;
     const lz = ((wz % CHUNK_SIZE) + CHUNK_SIZE) % CHUNK_SIZE;
     chunk.set(lx, ly, lz, type);
+    this.dirty.add(this.key(cx, cy, cz));
   }
 
   rebuildChunkMesh(cx: number, cy: number, cz: number) {
