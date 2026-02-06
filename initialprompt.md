@@ -1,0 +1,1 @@
+build a minecraft clone, but all in typescript.  Research the marketplace system, interactivity, and more.  Use browser localstorage for any storage.  This should be a frontend only implementation.  Build it in minecraft/

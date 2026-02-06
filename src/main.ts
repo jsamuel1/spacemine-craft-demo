@@ -1,5 +1,7 @@
 import { Engine } from './core/Engine';
 import { World } from './world/World';
+import { Player } from './player/Player';
+import { Controls } from './player/Controls';
 import { BlockType } from './types';
 
 const engine = new Engine();
@@ -22,6 +24,8 @@ for (let z = 0; z < 16; z++) {
 }
 world.rebuildAllMeshes();
 
-engine.camera.position.set(8, 20, 30);
-engine.camera.lookAt(8, 8, 8);
+const player = new Player();
+const controls = new Controls(player, engine.camera, engine.renderer.domElement, world);
+
+engine.onUpdate((dt) => controls.update(dt));
 engine.start();

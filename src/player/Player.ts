@@ -5,5 +5,6 @@ export class Player {
   velocity = new THREE.Vector3();
   yaw = 0;
   pitch = 0;
+  jetpackActive = true;
   magneticBoots = false;
 }
