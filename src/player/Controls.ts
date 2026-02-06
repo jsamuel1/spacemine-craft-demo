@@ -2,11 +2,14 @@ import * as THREE from 'three';
 import { Player } from './Player';
 import { World } from '../world/World';
 import { BlockType } from '../types';
+import { Fuel } from '../systems/Fuel';
+import { Health } from '../systems/Health';
 
 const THRUST = 20;
 const DRAG = 0.97;
 const MOUSE_SENS = 0.002;
 const BOOT_GRAVITY = 15;
+const COLLISION_SPEED_THRESHOLD = 8;
 
 export class Controls {
   private keys = new Set<string>();
@@ -14,6 +17,9 @@ export class Controls {
   private camera: THREE.PerspectiveCamera;
   private canvas: HTMLCanvasElement;
   private world: World;
+  fuel: Fuel | null = null;
+  health: Health | null = null;
+  thrusting = false;
 
   constructor(player: Player, camera: THREE.PerspectiveCamera, canvas: HTMLCanvasElement, world: World) {
     this.player = player;
@@ -53,16 +59,21 @@ export class Controls {
     const right = new THREE.Vector3(1, 0, 0).applyEuler(new THREE.Euler(0, p.yaw, 0));
     const up = new THREE.Vector3(0, 1, 0);
 
-    // Thrust input
+    // Thrust input (gated by fuel)
     const thrust = new THREE.Vector3();
-    if (this.keys.has('KeyW')) thrust.add(forward);
-    if (this.keys.has('KeyS')) thrust.sub(forward);
-    if (this.keys.has('KeyA')) thrust.sub(right);
-    if (this.keys.has('KeyD')) thrust.add(right);
-    if (this.keys.has('Space')) thrust.add(up);
-    if (this.keys.has('ShiftLeft') || this.keys.has('ShiftRight')) thrust.sub(up);
-    if (thrust.length() > 0) thrust.normalize().multiplyScalar(THRUST * dt);
-    p.velocity.add(thrust);
+    const wantsThrust = this.keys.has('KeyW') || this.keys.has('KeyS') || this.keys.has('KeyA') || this.keys.has('KeyD') || this.keys.has('Space') || this.keys.has('ShiftLeft') || this.keys.has('ShiftRight');
+    const canThrust = !this.fuel || this.fuel.canThrust;
+    this.thrusting = wantsThrust && canThrust;
+    if (this.thrusting) {
+      if (this.keys.has('KeyW')) thrust.add(forward);
+      if (this.keys.has('KeyS')) thrust.sub(forward);
+      if (this.keys.has('KeyA')) thrust.sub(right);
+      if (this.keys.has('KeyD')) thrust.add(right);
+      if (this.keys.has('Space')) thrust.add(up);
+      if (this.keys.has('ShiftLeft') || this.keys.has('ShiftRight')) thrust.sub(up);
+      if (thrust.length() > 0) thrust.normalize().multiplyScalar(THRUST * dt);
+      p.velocity.add(thrust);
+    }
 
     // Magnetic boots: apply gravity toward nearest surface below
     if (p.magneticBoots) {
@@ -84,7 +95,8 @@ export class Controls {
     const H = 1.7; // total height below eye
     const move = p.velocity.clone().multiplyScalar(dt);
 
-    // Check each axis independently
+    // Check each axis independently, track collision for damage
+    const preSpeed = p.velocity.length();
     // X axis
     const nx = p.position.x + move.x;
     if (this.collidesAt(nx, p.position.y, p.position.z, W, H)) {
@@ -99,6 +111,14 @@ export class Controls {
     const nz = p.position.z + move.z;
     if (this.collidesAt(p.position.x + move.x, p.position.y + move.y, nz, W, H)) {
       move.z = 0; p.velocity.z = 0;
+    }
+    // Collision damage based on speed lost
+    if (this.health && preSpeed > COLLISION_SPEED_THRESHOLD) {
+      const postSpeed = p.velocity.length();
+      const impact = preSpeed - postSpeed;
+      if (impact > COLLISION_SPEED_THRESHOLD) {
+        this.health.damage(Math.floor(impact / 3));
+      }
     }
 
     p.position.add(move);

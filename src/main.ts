@@ -9,12 +9,15 @@ import { Inventory } from './systems/Inventory';
 import { InventoryPanel } from './ui/InventoryPanel';
 import { TradingPost } from './systems/TradingPost';
 import { TradingPostPanel } from './ui/TradingPostPanel';
-import { CreditDisplay } from './ui/CreditDisplay';
 import { Crafting } from './systems/Crafting';
 import { CraftingPanel } from './ui/CraftingPanel';
 import { HelpOverlay } from './ui/HelpOverlay';
 import { InteractiveBlocks } from './world/InteractiveBlocks';
 import { CratePanel } from './ui/CratePanel';
+import { Health } from './systems/Health';
+import { Oxygen } from './systems/Oxygen';
+import { Fuel } from './systems/Fuel';
+import { HUD } from './ui/HUD';
 
 const engine = new Engine();
 const world = new World(engine.scene);
@@ -42,16 +45,28 @@ hotbar.setInventory(inventory);
 const _inventoryPanel = new InventoryPanel(inventory);
 const tradingPost = new TradingPost(inventory);
 const _tradingPanel = new TradingPostPanel(tradingPost, inventory);
-const creditDisplay = new CreditDisplay(tradingPost);
 const crafting = new Crafting(inventory);
 const _craftingPanel = new CraftingPanel(crafting);
 new HelpOverlay();
+
+// F11: Health, Oxygen, Fuel systems + HUD
+const health = new Health();
+const oxygen = new Oxygen();
+const fuel = new Fuel();
+controls.fuel = fuel;
+controls.health = health;
+const hud = new HUD(health, oxygen, fuel, tradingPost);
 
 engine.onUpdate((dt) => {
   controls.update(dt);
   interaction.selectedBlock = hotbar.selectedBlock;
   interaction.update();
   hotbar.render();
-  creditDisplay.update();
+
+  // Update survival systems
+  fuel.update(dt, controls.thrusting);
+  oxygen.update(dt, player, world);
+  if (oxygen.level <= 0) health.damage(5 * dt);
+  hud.update();
 });
 engine.start();
