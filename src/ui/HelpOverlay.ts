@@ -19,6 +19,7 @@ export class HelpOverlay {
         <tr><td>Scroll Wheel</td><td>Cycle hotbar</td></tr>
         <tr><td>E</td><td>Inventory</td></tr>
         <tr><td>M</td><td>Trading Post</td></tr>
+        <tr><td>C</td><td>Crafting Station</td></tr>
         <tr><td>H</td><td>Toggle this help</td></tr>
       </table>
     `;
