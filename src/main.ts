@@ -7,6 +7,10 @@ import { BlockInteraction } from './player/BlockInteraction';
 import { Hotbar } from './ui/Hotbar';
 import { Inventory } from './systems/Inventory';
 import { InventoryPanel } from './ui/InventoryPanel';
+import { TradingPost } from './systems/TradingPost';
+import { TradingPostPanel } from './ui/TradingPostPanel';
+import { CreditDisplay } from './ui/CreditDisplay';
+import { HelpOverlay } from './ui/HelpOverlay';
 
 const engine = new Engine();
 const world = new World(engine.scene);
@@ -27,11 +31,15 @@ interaction.inventory = inventory;
 const hotbar = new Hotbar();
 hotbar.setInventory(inventory);
 const _inventoryPanel = new InventoryPanel(inventory);
+const tradingPost = new TradingPost(inventory);
+const _tradingPanel = new TradingPostPanel(tradingPost, inventory);
+const creditDisplay = new CreditDisplay(tradingPost);
 
 engine.onUpdate((dt) => {
   controls.update(dt);
   interaction.selectedBlock = hotbar.selectedBlock;
   interaction.update();
   hotbar.render();
+  creditDisplay.update();
 });
 engine.start();

@@ -1,5 +1,6 @@
 export class HelpOverlay {
   private el: HTMLDivElement;
+  get visible() { return this.el.style.display !== 'none'; }
 
   constructor() {
     this.el = document.createElement('div');
@@ -16,7 +17,9 @@ export class HelpOverlay {
         <tr><td>Right Click / P</td><td>Place block</td></tr>
         <tr><td>1-9</td><td>Select hotbar slot</td></tr>
         <tr><td>Scroll Wheel</td><td>Cycle hotbar</td></tr>
-        <tr><td>?</td><td>Toggle this help</td></tr>
+        <tr><td>E</td><td>Inventory</td></tr>
+        <tr><td>M</td><td>Trading Post</td></tr>
+        <tr><td>H</td><td>Toggle this help</td></tr>
       </table>
     `;
     Object.assign(this.el.style, {
@@ -37,7 +40,11 @@ export class HelpOverlay {
     document.body.appendChild(this.el);
 
     document.addEventListener('keydown', (e) => {
-      if (e.key === '?') this.el.style.display = this.el.style.display === 'none' ? 'block' : 'none';
-    });
+      if (e.code === 'KeyH') {
+        e.preventDefault();
+        e.stopPropagation();
+        this.el.style.display = this.el.style.display === 'none' ? 'block' : 'none';
+      }
+    }, true);
   }
 }
