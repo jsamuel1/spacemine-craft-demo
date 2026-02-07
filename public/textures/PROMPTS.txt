@@ -1,0 +1,37 @@
+TEXTURE GENERATION PROMPTS
+Use these with AI image generators (DALL-E, Midjourney, Stable Diffusion)
+to create replacement textures. Output should be 16x16 PNG with transparency.
+
+=== BASALT ===
+Dark volcanic basalt rock texture, 16x16 pixels. Deep charcoal grey base (#3A3A42) with subtle darker cracks and fissures. Occasional tiny lighter grey mineral flecks. Rough, igneous rock appearance. Pixel art style, top-down cubic game block face.
+
+=== IRON_ORE ===
+Iron ore embedded in dark rock, 16x16 pixels. Dark grey-brown stone base (#5A4030) with 3-5 irregular rust-orange ore veins/clusters (#C06830). Ore patches should be 2-4 pixels each, scattered asymmetrically. Pixel art style, cubic voxel game block face.
+
+=== ICE ===
+Space ice / frozen volatile block, 16x16 pixels. Pale blue-white crystalline surface (#B0D8F0) with translucent lighter streaks (#D8F0FF). Subtle crack lines in slightly darker blue. Faint sparkle highlights. Pixel art style, cubic voxel game block face.
+
+=== NICKEL ===
+Nickel ore deposit in rock, 16x16 pixels. Medium grey-green stone base (#6A7060) with silvery-green metallic nodules (#90A880). 2-4 pixel metallic clusters with subtle shine highlights. Pixel art style, cubic voxel game block face.
+
+=== REGOLITH ===
+Lunar/asteroid regolith surface, 16x16 pixels. Dusty grey-brown (#8A7A68) with fine granular noise texture. Tiny darker pebble spots and lighter dust patches. Powdery, loose soil look. Pixel art style, cubic voxel game block face.
+
+=== STEEL_PLANK ===
+Brushed steel plank / panel, 16x16 pixels. Metallic blue-grey (#8090A0) with horizontal brushed-metal streaks. Thin darker border lines (1px) on top and bottom edges suggesting panel seams. 2 small rivet dots near corners. Industrial space station look. Pixel art style, cubic voxel game block face.
+
+=== GLASS ===
+Space station glass/viewport block, 16x16 pixels. Very light blue-white semi-transparent (#D0E8F8) with thin frame border (2px, darker grey-blue). Subtle diagonal highlight streak across center. Clean, see-through appearance. Pixel art style, cubic voxel game block face.
+
+=== AIRLOCK_DOOR ===
+Heavy airlock door panel, 16x16 pixels. Dark gunmetal grey (#5A6068) with a central vertical seam line. Yellow-black hazard stripe across top 2 rows. Small red/green indicator light pixel at center-right. Reinforced industrial look with subtle panel lines. Pixel art style, cubic voxel game block face.
+
+=== STORAGE_CRATE ===
+Cargo storage crate, 16x16 pixels. Warm brown-tan wooden/composite panels (#A08050) with darker brown border frame (2px). Cross-brace pattern (X) in slightly darker shade across face. Small label/stencil marking area (lighter rectangle) near bottom. Pixel art style, cubic voxel game block face.
+
+=== WATER_TANK ===
+Water storage tank block, 16x16 pixels. Steel grey outer frame/border (#708090, 2px border) with blue liquid interior (#4080C0). Subtle horizontal water level line 3/4 up. Small gauge/valve circle near top-right corner. Pixel art style, cubic voxel game block face.
+
+=== REINFORCED_HULL ===
+Reinforced hull plating, 16x16 pixels. Dark olive-grey (#606858) with diamond/cross-hatch reinforcement pattern. 4 bolt/rivet dots near corners. Thicker border lines than steel plank. Heavy-duty armored appearance. Pixel art style, cubic voxel game block face.
+

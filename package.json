@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "generate-textures": "node scripts/generate-textures.mjs"
   },
   "dependencies": {
     "@types/three": "^0.182.0",

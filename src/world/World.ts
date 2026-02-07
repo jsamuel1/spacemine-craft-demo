@@ -4,12 +4,14 @@ import { BlockType } from '../types';
 import { buildChunkMesh } from './ChunkMesher';
 import { AsteroidGenerator } from './AsteroidGenerator';
 import { InteractiveBlocks } from './InteractiveBlocks';
+import { buildTextureAtlas, AtlasInfo } from './TextureAtlas';
 
 export class World {
   chunks = new Map<string, Chunk>();
   meshes = new Map<string, THREE.Mesh>();
   private scene: THREE.Scene;
-  private material = new THREE.MeshLambertMaterial({ vertexColors: true });
+  private atlas: AtlasInfo;
+  private material: THREE.MeshLambertMaterial;
   private generated = new Set<string>();
   dirty = new Set<string>(); // chunks modified by player
   generator: AsteroidGenerator | null = null;
@@ -17,6 +19,8 @@ export class World {
 
   constructor(scene: THREE.Scene) {
     this.scene = scene;
+    this.atlas = buildTextureAtlas();
+    this.material = this.atlas.material;
   }
 
   private key(cx: number, cy: number, cz: number) { return `${cx},${cy},${cz}`; }
@@ -67,7 +71,7 @@ export class World {
       // Convert local overflow coords to world coords
       const wx = cx * CHUNK_SIZE + lx, wy = cy * CHUNK_SIZE + ly, wz = cz * CHUNK_SIZE + lz;
       return this.getBlock(wx, wy, wz);
-    }, cx, cy, cz, this.interactive ?? undefined);
+    }, cx, cy, cz, this.interactive ?? undefined, this.atlas);
 
     if (geo.getAttribute('position').count === 0) return;
 
