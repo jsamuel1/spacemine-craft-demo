@@ -27,7 +27,12 @@ export class Controls {
     this.canvas = canvas;
     this.world = world;
 
-    canvas.addEventListener('click', () => canvas.requestPointerLock());
+    canvas.addEventListener('click', () => {
+      // Don't re-lock pointer if a UI panel overlay is visible
+      const panels = document.querySelectorAll<HTMLElement>('[data-ui-panel]');
+      for (const p of panels) if (p.style.display !== 'none') return;
+      canvas.requestPointerLock();
+    });
     document.addEventListener('mousemove', (e) => {
       if (document.pointerLockElement !== canvas) return;
       this.player.yaw -= e.movementX * MOUSE_SENS;

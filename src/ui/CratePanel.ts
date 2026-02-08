@@ -14,6 +14,7 @@ export class CratePanel {
     this.inventory = inventory;
     this.interactive = interactive;
     this.el = document.createElement('div');
+    this.el.setAttribute('data-ui-panel', 'crate');
     Object.assign(this.el.style, {
       position: 'fixed', top: '0', left: '0', width: '100%', height: '100%',
       background: 'rgba(0,0,0,0.8)', display: 'none', zIndex: '60',
@@ -37,6 +38,7 @@ export class CratePanel {
     this.cratePos = { x, y, z };
     this.visible = true;
     this.el.style.display = 'flex';
+    document.exitPointerLock();
     this.render();
   }
 

@@ -10,6 +10,7 @@ export class InventoryPanel {
   constructor(inventory: Inventory) {
     this.inventory = inventory;
     this.el = document.createElement('div');
+    this.el.setAttribute('data-ui-panel', 'inventory');
     Object.assign(this.el.style, {
       position: 'fixed', top: '0', left: '0', width: '100%', height: '100%',
       background: 'rgba(0,0,0,0.8)', display: 'none', zIndex: '50',
@@ -25,7 +26,7 @@ export class InventoryPanel {
   private toggle() {
     this.visible = !this.visible;
     this.el.style.display = this.visible ? 'flex' : 'none';
-    if (this.visible) this.render();
+    if (this.visible) { document.exitPointerLock(); this.render(); }
   }
 
   private render() {
